@@ -1,10 +1,10 @@
 {
-  "name": "react-todo-list",
+  "name": "class",
   "version": "1.0.0",
-  "description": "A simple todo list app built with React, Redux and Webpack",
+  "description": "論壇實作",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "serve": "API_HOST=http://localhost:3001  nodemon  src/server/index.js  --ignore src/containers --ignore src/components --ignore src/redux  ",
+    "serve": "API_HOST=http://localhost:3001  nodemon  src/server/index.js  --ignore src/containers --ignore src/components --ignore src/redux",
     "dev": "node src/server/index.js",
     "production_test": "NODE_ENV=production"
   },

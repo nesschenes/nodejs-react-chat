@@ -1,7 +1,7 @@
 //沒把新增留言寫入reducer原因為留言只有一個頁面用到，所以在該頁面willMount時
-//在用ajax去撈留言資料絢染即可
+//再用ajax去撈留言資料即可
 
-export function article(state=[],action){
+export function article(state = [], action){
 	switch(action.type){
 		case 'ADD_ARTICLE':
 			return [{

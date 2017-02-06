@@ -3,11 +3,11 @@ import { sendMail } from './utils/mail.js';
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import config from '../config.js';
-
+import axios from 'axios';
 const { jwtSecret } = config; 
 
 
-const authToken = (req,res,next) => {
+const authToken = (req, res, next) => {
 	const token = req.cookies.t;
 	if (token) {
 		jwt.verify(req.cookies.t, jwtSecret, (err, decoded) => {
@@ -32,7 +32,7 @@ app.use('*', function(req, res, next) {
   next();
  });
 
-app.get('/getArticle',function(req,res){
+app.get('/getArticle',function(req, res){
 	Post.find({}).sort({lastModify : -1})
   	.then(data => {
 	  	 res.end(JSON.stringify(data))
@@ -82,19 +82,11 @@ app.post('/login',function(req,res){
 			if(data[0] === undefined) {
 				res.end('帳號或密碼錯誤');
 			}
-			if (data[0].password === req.body.password) {
+			const md5  = crypto.createHash('md5');
+			if (data[0].password === md5.update(req.body.password).digest('hex')) { //密碼正確
 				//頁面判斷使用
 			  res.cookie('ifUser',true, { maxAge: 1000 * 60 * 60 * 24 * 1, httpOnly: false });
-
-				//存入加密帳號為cookie之後給Redis使用者連線判斷使用
-				// if(!req.session.user) {
-				// 	let cipher = crypto.createCipher('aes-256-cbc','testkey');
-				// 	let crypted = cipher.update(req.body.account,'utf8','binary');
-				// 	crypted += cipher.final('binary');
-					res.cookie('a1',req.body.account, { maxAge: 1000 * 60 * 60 * 24 * 1, httpOnly: false });
-			//	}
-
-
+				res.cookie('a1',req.body.account, { maxAge: 1000 * 60 * 60 * 24 * 1, httpOnly: false });
 				//將會在cookie中存入token之後token回到server取值
 				req.session.user = req.body.account;
 
@@ -116,76 +108,78 @@ app.post('/login',function(req,res){
 })
 
 app.post('/FBlogin', (req, res) => {
-
-				//TODO 目前有安全性問題，如果post一個別人的fb id即可登入
-	User.find({account: req.body.id})
-		.then(data => {
-			if(data[0] === undefined) {
-				//第一次使用oauth 幫使用者註冊
-				let user = new User({
-					account: req.body.id,
-					//password: req.body.password,
-					email: req.body.email,
-					name: req.body.name,
-					avatar: req.body.picture.data.url,
-					RegistedDate: new Date(),
-					mobile: '',
-					address: '',
-					hobby: '',
-					birthday: ''
-				});
-				user.save()
-				.catch(err => console.log(err));
-				sendMail({ email: req.body.email })
-
-				res.cookie('ifUser',true, { maxAge: 1000 * 60 * 60 * 24 * 1, httpOnly: false });
-				res.cookie('a1',req.body.id, { maxAge: 1000 * 60 * 60 * 24 * 1, httpOnly: false });
-
-				//將會在cookie中存入token之後token回到server取值
-				req.session.user = req.body.id;
-				//jwt token
-				let jwtpayload = data[0];
-				jwtpayload.password = null;//移除密碼欄位，之後重要資訊時要求輸入密碼
-				let token = jwt.sign({
-					exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24),
-					data: {
-					user: jwtpayload
-					}
-				}, jwtSecret);
-				res.cookie('t', token, { maxAge: 1000 * 60 * 60 * 24 * 1, httpOnly: true });
-				res.end('成功註冊');
-				 
-			} else {
-				User.find({account:req.body.id})
+   axios.get('https://graph.facebook.com/me?access_token='+req.body.token)
+		.then(res => {
+			console.log(res)
+			if(typeof res.data.id !== 'undefined') {//FB access_token認證成功
+				User.find({account: req.body.id})
 					.then(data => {
+						if(data[0] === undefined) {
+							//第一次使用oauth 幫使用者註冊
+							let user = new User({
+								account: req.body.id,
+								email: req.body.email,
+								name: req.body.name,
+								avatar: req.body.picture.data.url,
+								RegistedDate: new Date(),
+								mobile: '',
+								address: '',
+								hobby: '',
+								birthday: ''
+							});
+							user.save()
+							.catch(err => console.log(err));
+							sendMail({ email: req.body.email })
 
-						res.cookie('ifUser',true, { maxAge: 1000 * 60 * 60 * 24 * 1, httpOnly: false });
-						res.cookie('a1',req.body.id, { maxAge: 1000 * 60 * 60 * 24 * 1, httpOnly: false });
-						//將會在cookie中存入token之後token回到server取值
-						req.session.user = req.body.id;
-						//jwt token
-						let jwtpayload = data[0];
-						jwtpayload.password = null;//移除密碼欄位，之後重要資訊時要求輸入密碼
-						let token = jwt.sign({
-							exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24),
-							data: {
-							user: jwtpayload
-							}
-						}, jwtSecret);
-						res.cookie('t', token, { maxAge: 1000 * 60 * 60 * 24 * 1, httpOnly: true });
+							res.cookie('ifUser',true, { maxAge: 1000 * 60 * 60 * 24 * 1, httpOnly: false });
+							res.cookie('a1',req.body.id, { maxAge: 1000 * 60 * 60 * 24 * 1, httpOnly: false });
 
-						res.json({
-							result: 'ok',
-							data
-						})
-				  })		
-			}
-		})
-		.catch(err => {
-			console.log(err);
-		})	
+							//將會在cookie中存入token之後token回到server取值
+							req.session.user = req.body.id;
+							//jwt token
+							let jwtpayload = data[0];
+							jwtpayload.password = null;//移除密碼欄位，之後重要資訊時要求輸入密碼
+							let token = jwt.sign({
+								exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24),
+								data: {
+								user: jwtpayload
+								}
+							}, jwtSecret);
+							res.cookie('t', token, { maxAge: 1000 * 60 * 60 * 24 * 1, httpOnly: true });
+							res.end('成功註冊');
+							
+						} else {
+							User.find({account:req.body.id})
+								.then(data => {
 
-}) 
+									res.cookie('ifUser',true, { maxAge: 1000 * 60 * 60 * 24 * 1, httpOnly: false });
+									res.cookie('a1',req.body.id, { maxAge: 1000 * 60 * 60 * 24 * 1, httpOnly: false });
+									//將會在cookie中存入token之後token回到server取值
+									req.session.user = req.body.id;
+									//jwt token
+									let jwtpayload = data[0];
+									jwtpayload.password = null;//移除密碼欄位，之後重要資訊時要求輸入密碼
+									let token = jwt.sign({
+										exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24),
+										data: {
+										user: jwtpayload
+										}
+									}, jwtSecret);
+									res.cookie('t', token, { maxAge: 1000 * 60 * 60 * 24 * 1, httpOnly: true });
+
+									res.json({
+										result: 'ok',
+										data
+									})
+								})		
+						}
+					})
+					.catch(err => {
+						console.log(err);
+					})	
+		}	
+	});
+}); 
 
 app.post('/logout',function(req,res){
 	res.cookie('ifUser',true, { expires: new Date() });
@@ -198,12 +192,12 @@ app.post('/logout',function(req,res){
 
 app.post('/signup',function(req,res){
 	User.find({account:req.body.account})
-  	.then(data => {
-	  	if(data[0] !== undefined){
-		  	res.end('此帳號已被註冊');
-				throw new Error('此帳號已被註冊');
-		  }
-	  })
+		.then(data => {
+			if(data[0] !== undefined){
+				res.end('此帳號已被註冊');
+					throw new Error('此帳號已被註冊');
+			}
+		})
 		.then(() => {
 		User.find({email:req.body.email})
 			.then(data => {
@@ -213,13 +207,12 @@ app.post('/signup',function(req,res){
 				}
 			})
 			.then(() => {
-				const md5  = crypto.createHash('md5');
 				let user = new User({
 					account: req.body.account,
-					password: req.body.password,
+					password: crypto.createHash('md5').update(req.body.password).digest('hex'),
 					email: req.body.email,
 					name: req.body.nickName,
-					avatar: `http://www.gravatar.com/avatar/${md5.update(req.body.email).digest('hex')}?s=120&d=identicon`,
+					avatar: `http://www.gravatar.com/avatar/${crypto.createHash('md5').update(req.body.email).digest('hex')}?s=120&d=identicon`,
 					RegistedDate: new Date(),
 					mobile: '',
 					address: '',
@@ -265,9 +258,9 @@ app.put('/UpdateUserInfo',authToken,(req,res) => {
 		avatar: req.body.avatar,
 		name: req.body.name,
 		mobile: req.body.mobile,
-    address: req.body.address,
-    hobby: req.body.hobby,
-    birthday: req.body.birthday,
+		address: req.body.address,
+		hobby: req.body.hobby,
+		birthday: req.body.birthday,
 	})
 	.then(() => (
 		res.end('更改成功')
