@@ -11,6 +11,7 @@ import ArticleBlock from '../components/utils/ArticleBlock/';
 import Loading from '../components/utils/Loading/';
 import axios from 'axios';
 import config from '../config';
+import TextField from 'material-ui/TextField';
 
 const style = {
   container: {
@@ -18,6 +19,7 @@ const style = {
   postBtn: {
     position: 'fixed',
     right: '50px',
+    top: '50px'
   },
 }
 
@@ -29,9 +31,11 @@ class Main extends Component {
       articleContentModal: false,
       activeArticle: '',
       dialog: false,
-      dialogText: ''
+      dialogText: '',
+      FilterArticles: ''
     }
   }
+
   componentDidMount() {
     const context = this;
 
@@ -72,9 +76,42 @@ class Main extends Component {
       }
     });
   }
+
+  searchArticle(e) {
+    if (e.target.value.length < 1){ //輸入框空白
+      axios.get('/getArticle')
+      .then((res) => {
+        console.log(res.data);
+        this.setState({FilterArticles: res.data})
+      })     
+    };
+    if(e.target.value.length > 20) {
+      sweetAlert('不可超過20字');
+      return
+    }; 
+    axios.get(`/articles/title/${e.target.value}`)
+    .then((res) => {
+      console.log(res.data);
+      this.setState({FilterArticles: res.data})
+    })
+  }
+
+
+
+
   render() {
     return (
       <div style={style.container}>
+
+
+       <TextField
+         style={{position: 'absolute', top: '50px', left: '15%'}}
+         hintText="搜尋文章..."
+         underlineStyle={{borderColor: '#EC407A'}}
+         onBlur={(e) => this.searchArticle(e)}
+        />
+
+
         { this.state.loading ? <Loading /> : '' }
         { this.state.dialog ? <SimpleDialog content={this.state.dialogText} context={this} /> : '' }
         { this.state.articlePostModal ? <ArticlePostModal user={this.props.user} context={this} /> : '' }
@@ -87,7 +124,7 @@ class Main extends Component {
           :
           ''
         }
-          <ArticleBlock articleClick={(e,id) => this.articleClick(e,id)} articles={this.props.articles} />
+          <ArticleBlock articleClick={(e,id) => this.articleClick(e,id)} articles={this.state.FilterArticles ? this.state.FilterArticles : this.props.articles} /> {/*假設重新回到此頁面時state會被清空，此時則直接讀取props而飛state*/}
           { this.state.articleContentModal
             ?
             <ArticleContentModal

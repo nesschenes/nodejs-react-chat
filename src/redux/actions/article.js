@@ -21,3 +21,10 @@ export const editArticle = (payload) => {
 			lastModify: new Date().toISOString()
     })
   };
+
+export const searchArticle = (payload) => {
+    return ({
+      type: 'SEARCH_ARTICLE',
+      payload: payload,
+    })
+  };

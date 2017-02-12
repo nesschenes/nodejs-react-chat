@@ -39,6 +39,7 @@ app.get('/getArticle',function(req, res){
 		})
 })
 
+
 ///這裡如發出get並且在server重啟第一次的情況，在login.js的getuser的get會延遲，但開devtool disable cache又不會，改成post則沒這問題
 app.post('/getUser',function(req,res){
 	if (req.session.user) {
@@ -76,6 +77,15 @@ app.get('/articles/:id', (req,res) => {
 	})
 })
 
+
+app.get('/articles/title/:title', (req,res) => {
+	console.log(req.params.title)
+	Post.find({title: req.params.title})
+	.then(data => {
+  	 res.end(JSON.stringify(data))
+	})
+})
+
 app.post('/login',function(req,res){
 	User.find({account:req.body.account})
 		.then(data => {
@@ -107,10 +117,10 @@ app.post('/login',function(req,res){
 		})
 })
 
-app.post('/FBlogin', (req, res) => {
+app.post('/FBlogin', (req, res0) => {
+	console.log(req.body.token)
    axios.get('https://graph.facebook.com/me?access_token='+req.body.token)
 		.then(res => {
-			console.log(res)
 			if(typeof res.data.id !== 'undefined') {//FB access_token認證成功
 				User.find({account: req.body.id})
 					.then(data => {
@@ -131,8 +141,8 @@ app.post('/FBlogin', (req, res) => {
 							.catch(err => console.log(err));
 							sendMail({ email: req.body.email })
 
-							res.cookie('ifUser',true, { maxAge: 1000 * 60 * 60 * 24 * 1, httpOnly: false });
-							res.cookie('a1',req.body.id, { maxAge: 1000 * 60 * 60 * 24 * 1, httpOnly: false });
+							res0.cookie('ifUser',true, { maxAge: 1000 * 60 * 60 * 24 * 1, httpOnly: false });
+							res0.cookie('a1',req.body.id, { maxAge: 1000 * 60 * 60 * 24 * 1, httpOnly: false });
 
 							//將會在cookie中存入token之後token回到server取值
 							req.session.user = req.body.id;
@@ -145,15 +155,15 @@ app.post('/FBlogin', (req, res) => {
 								user: jwtpayload
 								}
 							}, jwtSecret);
-							res.cookie('t', token, { maxAge: 1000 * 60 * 60 * 24 * 1, httpOnly: true });
-							res.end('成功註冊');
+							res0.cookie('t', token, { maxAge: 1000 * 60 * 60 * 24 * 1, httpOnly: true });
+							res0.end('成功註冊');
 							
 						} else {
 							User.find({account:req.body.id})
 								.then(data => {
 
-									res.cookie('ifUser',true, { maxAge: 1000 * 60 * 60 * 24 * 1, httpOnly: false });
-									res.cookie('a1',req.body.id, { maxAge: 1000 * 60 * 60 * 24 * 1, httpOnly: false });
+									res0.cookie('ifUser',true, { maxAge: 1000 * 60 * 60 * 24 * 1, httpOnly: false });
+									res0.cookie('a1',req.body.id, { maxAge: 1000 * 60 * 60 * 24 * 1, httpOnly: false });
 									//將會在cookie中存入token之後token回到server取值
 									req.session.user = req.body.id;
 									//jwt token
@@ -165,9 +175,9 @@ app.post('/FBlogin', (req, res) => {
 										user: jwtpayload
 										}
 									}, jwtSecret);
-									res.cookie('t', token, { maxAge: 1000 * 60 * 60 * 24 * 1, httpOnly: true });
+									res0.cookie('t', token, { maxAge: 1000 * 60 * 60 * 24 * 1, httpOnly: true });
 
-									res.json({
+									res0.json({
 										result: 'ok',
 										data
 									})

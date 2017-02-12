@@ -29,6 +29,7 @@ const style = {
   },
   date: {
     position: 'absolute',
+    fontSize: '8px',
     right: '0px',
     bottom: '10px'
   },
@@ -56,11 +57,13 @@ const ArticleBlock = (props) => (
             <div>{i.title}</div>
             <div style={style.author}>作者：{i.author}</div>
           </div>
-          <div style={style.date}>最後修改：{(i.lastModify).replace(/[A-Z]/g, " ")}</div>
+          {i.lastModify ? <div style={style.date}>最後修改：{(i.lastModify).replace(/[A-Z]/g, " ")}</div> : ''} {/*因一開始server side render 沒 article 所以會在replace出錯*/}
         </div>
       ))
     }
   </div>
 )
+
+
 
 export default ArticleBlock;

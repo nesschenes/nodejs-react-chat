@@ -30,7 +30,7 @@ const iconButtonElement = (
 const ListMsg = (props) => (
   <div>
   {props.comments.map(i => (
-    <List>
+    <List key={i}>
       <ListItem
         leftAvatar = {
           <div>

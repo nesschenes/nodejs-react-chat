@@ -45,7 +45,6 @@ export default class DropDownMenuSimpleExample extends React.Component {
           <MenuItem value={1} primaryText={ `使用者： ${this.props.title}` } />
           <MenuItem value={2} primaryText="個人資料設定" />
           <MenuItem value={3} primaryText="我的文章" />
-          <MenuItem value={4} primaryText="Weekends" />
           <MenuItem value={5} primaryText="登出" />
         </DropDownMenu>
       </div>

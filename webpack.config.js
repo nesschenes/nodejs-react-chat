@@ -5,7 +5,7 @@ module.exports = {
   entry: {
     app:[
     'webpack-hot-middleware/client',
-    __dirname+'/src/client/client.js'
+    './src/client/client.js'
   ],
 },
 

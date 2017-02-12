@@ -39,15 +39,9 @@ class Header extends Component {
 
 
 
-    ///////////////////////////////
+///////////////////////////////
 
 
-
-    function checkLoginState() {
-      FB.getLoginStatus(function(response) {
-        statusChangeCallback(response);
-      });
-    }
 
     window.fbAsyncInit = function() {
       FB.init({
@@ -57,40 +51,25 @@ class Header extends Component {
         version    : 'v2.8' // use graph api version 2.8
       });
     };
-
-
-    ///////////////////////////////
   }
 
   statusChangeCallback = (response) => {
-        console.log(response);
-        // The response object is returned with a status field that lets the
-        // app know the current login status of the person.
-        // Full docs on the response object can be found in the documentation
-        // for FB.getLoginStatus().
-        if (response.status === 'connected') {
-          // Logged into your app and Facebook.
-          console.log('connett FB')
-          this.testAPI(response.authResponse.accessToken);
-        } else if (response.status === 'not_authorized') {
-          console.log('not_authorized')
-          FB.login((response) => {
-            this.testAPI(response.authResponse.accessToken);
-          });
-          // The person is logged into Facebook, but not your app.
-          // document.getElementById('status').innerHTML = 'Please log ' +
-          //   'into this app.';
-        } else {
-          FB.login((response) => {
-            this.testAPI(response.authResponse.accessToken);
-          })
-          // The person is not logged into Facebook, so we're not sure if
-          // they are logged into this app or not.
-          // document.getElementById('status').innerHTML = 'Please log ' +
-          //   'into Facebook.';
-          console.log('not login')
-        }
-      }
+    console.log(response);
+    if (response.status === 'connected') { //使用者登入FB且認證你的APP了
+      console.log('connett FB')
+      this.testAPI(response.authResponse.accessToken);
+    } else if (response.status === 'not_authorized') { //使用者登入了FB但還沒對你的APP認證
+      console.log('not_authorized')
+      FB.login((response) => {
+        this.testAPI(response.authResponse.accessToken);
+      });
+    } else {   //使用者還沒登入ＦＢ
+      FB.login((response) => {  
+        this.testAPI(response.authResponse.accessToken);
+      })
+      console.log('not login')
+    }
+  }
 
   testAPI = (token) => {
     const context = this;
@@ -100,7 +79,7 @@ class Header extends Component {
     },(res) => {
       // 把資料先傳給後端，看使用者是否註冊過，如第一次則註冊使用者並登入，之後則直接登入
       console.log(res)
-      axios.post('/FBlogin' ,res)
+      axios.post('/FBlogin', Object.assign(res, {token}))
       .then(response => {
         console.log(response.data)
         if (response.data.result === 'ok') {
@@ -120,7 +99,6 @@ class Header extends Component {
                   browserHistory.push('/main');
                 }
               })
-            //location.reload();
           }
         }
       })
@@ -129,14 +107,15 @@ class Header extends Component {
   login = () => {
     browserHistory.push('/login')
   };
+
   register = () => {
     browserHistory.push('/register')
   };
+
   logout = () => {
     const context = this;
     this.setState({ loading: true });
     localStorage.setItem('reloadFlag', false);
-
     //登出時讓所有裝置登出
     socket.emit('logout',this.props.userInfo.account);
     //包含自己登出
@@ -150,6 +129,7 @@ class Header extends Component {
       console.log(error);
     }) 
   }
+
   FBlogin() {
     const context = this;
     this.setState({ loading: true });
@@ -157,6 +137,8 @@ class Header extends Component {
         context.statusChangeCallback(response);
       });
   }
+
+
 
   render() {
     return (
