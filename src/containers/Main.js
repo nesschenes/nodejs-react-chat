@@ -83,7 +83,8 @@ class Main extends Component {
       .then((res) => {
         console.log(res.data);
         this.setState({FilterArticles: res.data})
-      })     
+      });
+      return     
     };
     if(e.target.value.length > 20) {
       sweetAlert('不可超過20字');
@@ -108,7 +109,7 @@ class Main extends Component {
          style={{position: 'absolute', top: '50px', left: '15%'}}
          hintText="搜尋文章..."
          underlineStyle={{borderColor: '#EC407A'}}
-         onBlur={(e) => this.searchArticle(e)}
+         onChange={(e) => this.searchArticle(e)}
         />
 
 

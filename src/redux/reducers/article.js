@@ -7,7 +7,7 @@ export function article(state = [], action){
 			return [{
 				_id: action._id,
 				title: action.title,
-                content: action.content,
+        content: action.content,
 				author: action.author,
 				PostDate: action.PostDate,
 				avatar: action.avatar,

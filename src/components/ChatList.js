@@ -40,7 +40,7 @@ const ChatList = (props) => (
         }>
         <div>
           <div >{i.content}</div>
-          <div style={{position: 'relative', top: '15px'}}>{i.date}</div>
+          <div style={{position: 'relative', top: '0px', float: 'right'}}>{i.date}</div>
         </div>
       </ListItem>
 

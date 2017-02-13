@@ -74,6 +74,7 @@ export default class ArticleModal extends React.Component {
       context.setState({ dialog:true })
       context.setState({ dialogText:response.data })
       socket.emit('postArticle',{data:'test'});
+      location.reload();//有時會因為Lag關係，發表的client在Reducer產生兩個文章
     })
     .catch((e) => {
       alert(e);

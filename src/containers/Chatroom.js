@@ -76,7 +76,7 @@ class Chatroom extends Component {
      if(typeof window !== 'undefined') {
       window.onbeforeunload = myUnloadEvent;
         function myUnloadEvent() {
-          socket.emit('close',document.cookie.replace(/(?:(?:^|.*;\s*)a1\s*\=\s*([^;]*).*$)|^.*$/, "$1"))
+          socket.emit('close',document.cookie.replace(/(?:(?:^|.*;\s*)a1\s*\=\s*([^;]*).*$)|^.*$/, "$1"));//$1 表示為match到的第一個參數，可參考https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/n
       }
     }
     const context = this;
@@ -120,23 +120,8 @@ class Chatroom extends Component {
 
     socket.on('chatRoomUsers', (res) => {
       if(this.state.users !== res.user) {
-        this.setState({ users: res.user })
-        console.log(res)
-        // console.log(res.user)
-        // console.log(res.user[Object.keys(res.user)[(Object.keys(res.user).length)-1]])
-        // const lastEnterUser = res.user[Object.keys(res.user)[(Object.keys(res.user).length)-1]]
-        // this.setState({ lastEnterUser: lastEnterUser.name }, () => {
-        //   this.setState({ showWelcome: true }, () => {
-        //     setTimeout(() => {
-        //       this.setState({ showWelcome: false });
-        //     },1000)
-        //   })
-        // });
-      }
-      Object.keys(res.user).map(function(objectKey, index) {
-          let value = objectKey;
-      })
-
+        this.setState({ users: res.user });
+      };
     })
 
     //加上Enter送出快捷鍵
@@ -155,8 +140,6 @@ class Chatroom extends Component {
       date: new Date().getHours() + ':' + new Date().getMinutes() + ':' + new Date().getSeconds()
     }
 
-    // const date = new Date();
-    // console.log(date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds())
     socket.emit('chat',{content: item});
     findDOMNode(this.refs.content).value = "";
   }
