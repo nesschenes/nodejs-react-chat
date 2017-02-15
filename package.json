@@ -42,7 +42,13 @@
     "redux-thunk": "*",
     "webpack": "*",
     "webpack-dev-middleware": "*",
-    "webpack-hot-middleware": "*"
+    "webpack-hot-middleware": "*",
+    "style-loader": "*",
+    "css-loader": "*",
+    "redis": "*",
+    "nodemailer": "*",
+    "jsonwebtoken": "*",
+    "socket.io": "*"
   },
   "devDependencies": {
     "babel-preset-stage-0": "*"

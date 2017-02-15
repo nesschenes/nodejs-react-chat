@@ -144,7 +144,7 @@ const renderFullPage = (html, preloadedState) => (`
 	<script src="/socket.io/socket.io.js"></script>
   <script></script>
 	<script>
-	  var socket = io.connect('http://localhost:3001');
+	  var socket = io.connect();
 	</script>
 </head>
 <body>
