@@ -1,8 +1,7 @@
-import React, { Component } from "react";
+import React, { Component, createRef } from "react";
 import axios from "axios";
 import SimpleDialog from "./utils/Dialogs/SimpleDialog.js";
 import { connect } from "react-redux";
-import { findDOMNode } from "react-dom";
 import { Button, TextField } from "@mui/material";
 
 class PersonalInfo extends Component {
@@ -20,6 +19,8 @@ class PersonalInfo extends Component {
       addressCheck: true,
       hobbyCheck: true,
     };
+    this.fileInput = createRef();
+    this.avatar = createRef();
   }
   static getDerivedStateFromProps(nextProps, prevState) {
     if (
@@ -37,13 +38,13 @@ class PersonalInfo extends Component {
     }
     return null;
   }
-  check(e, type) {
+  check = (e, type) => {
     if (e.target.value === "") {
       this.setState({ [type]: false });
       return;
     }
     this.setState({ [type]: true });
-  }
+  };
   sendRequest() {
     axios
       .put("/UpdateUserInfo", {
@@ -60,27 +61,27 @@ class PersonalInfo extends Component {
 
   componentDidMount() {
     const context = this;
-    findDOMNode(this.refs.fileInput).addEventListener("change", () => {
+    context.fileInput.current.addEventListener("change", () => {
       if (
-        findDOMNode(this.refs.fileInput).files &&
-        findDOMNode(this.refs.fileInput).files[0]
+        context.fileInput.current.files &&
+        context.fileInput.current.files[0]
       ) {
         var FR = new FileReader();
         FR.onload = function (e) {
-          let base64 = e.target.result.replace(
+          const base64 = e.target.result.replace(
             /^data:image\/(png|jpg|jpeg);base64,/,
             ""
           );
           console.log(base64);
-          var xhttp = new XMLHttpRequest();
+          const xhttp = new XMLHttpRequest();
           xhttp.open("POST", "https://api.imgur.com/3/image", true);
           xhttp.setRequestHeader("Content-type", "application/json");
-          xhttp.setRequestHeader("Authorization", "Client-ID b50a7351eee91f0");
+          xhttp.setRequestHeader("Authorization", "Client-ID a2986d9a6c4e01c");
           xhttp.send(JSON.stringify({ image: base64 }));
           xhttp.onreadystatechange = function () {
             if (xhttp.readyState == 4 && xhttp.status == 200) {
-              let avatarSrc = JSON.parse(xhttp.responseText).data.link;
-              findDOMNode(context.refs.avatar).src = avatarSrc;
+              const avatarSrc = JSON.parse(xhttp.responseText).data.link;
+              context.avatar.current.src = avatarSrc;
               axios
                 .put("/UpdateUserInfo", {
                   avatar: avatarSrc,
@@ -98,26 +99,30 @@ class PersonalInfo extends Component {
             }
           };
         };
-        FR.readAsDataURL(findDOMNode(this.refs.fileInput).files[0]);
+        FR.readAsDataURL(context.fileInput.current.files[0]);
       }
     });
   }
-  changeText(e, type) {
+  changeText = (e, type) => {
     this.setState({ [type]: e.target.value });
-  }
+  };
   render() {
     return (
       <div style={style.container}>
         <div style={style.left}>
           {this.props.userInfo.avatar ? (
-            <img ref="avatar" height="200px" src={this.props.userInfo.avatar} />
+            <img
+              ref={this.avatar}
+              height="200px"
+              src={this.props.userInfo.avatar}
+            />
           ) : (
             ""
           )}
           <input
             style={style.fileInput}
             id="file-upload"
-            ref="fileInput"
+            ref={this.fileInput}
             type="file"
           />
         </div>

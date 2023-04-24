@@ -1,6 +1,5 @@
-import React from "react";
+import React, { createRef } from "react";
 import axios from "axios";
-import { findDOMNode } from "react-dom";
 import { Button, Dialog } from "@mui/material";
 import socket from "../../../client/socket";
 
@@ -48,6 +47,8 @@ export default class ArticleModal extends React.Component {
       title: "",
       tag: "",
     };
+    this.div1 = createRef();
+    this.fileInput = createRef();
   }
   titleInput = (e) => {
     this.setState({ title: e.target.value });
@@ -64,7 +65,7 @@ export default class ArticleModal extends React.Component {
       .post("/postArticle", {
         name: this.props.user.name,
         account: this.props.user.account,
-        content: this.refs.div1.innerHTML,
+        content: this.div1.current.innerHTML,
         title: this.state.title,
         avatar: this.props.user.avatar,
         tag: this.state.tag,
@@ -82,44 +83,44 @@ export default class ArticleModal extends React.Component {
       });
   };
   componentDidMount() {
-    findDOMNode(this.refs.div1).addEventListener("keydown", (e) => {
-      console.log(this.refs.div1.innerHTML);
-      this.setState({ content: this.refs.div1.innerHTML });
+    this.div1.current.addEventListener("keydown", (e) => {
+      console.log(this.div1.current.innerHTML);
+      this.setState({ content: this.div1.current.innerHTML });
     });
     const context = this;
-    findDOMNode(this.refs.fileInput).addEventListener("change", () => {
+    context.fileInput.current.addEventListener("change", () => {
       if (
-        findDOMNode(this.refs.fileInput).files &&
-        findDOMNode(this.refs.fileInput).files[0]
+        context.fileInput.current.files &&
+        context.fileInput.current.files[0]
       ) {
-        var FR = new FileReader();
+        const FR = new FileReader();
         FR.onload = function (e) {
-          let base64 = e.target.result.replace(
+          const base64 = e.target.result.replace(
             /^data:image\/(png|jpg);base64,/,
             ""
           );
 
-          var xhttp = new XMLHttpRequest();
+          const xhttp = new XMLHttpRequest();
           xhttp.open("POST", "https://api.imgur.com/3/image", true);
           xhttp.setRequestHeader("Content-type", "application/json");
-          xhttp.setRequestHeader("Authorization", "Client-ID b50a7351eee91f0");
+          xhttp.setRequestHeader("Authorization", "Client-ID a2986d9a6c4e01c");
           xhttp.send(JSON.stringify({ image: base64 }));
           xhttp.onreadystatechange = function () {
             if (xhttp.readyState == 4 && xhttp.status == 200) {
-              var para = document.createElement("img");
+              const para = document.createElement("img");
               para.height = 150;
               para.src = JSON.parse(xhttp.responseText).data.link;
-              findDOMNode(context.refs.div1).appendChild(para);
+              context.fileInput.current.appendChild(para);
             }
           };
         };
-        FR.readAsDataURL(findDOMNode(this.refs.fileInput).files[0]);
+        FR.readAsDataURL(context.fileInput.current.files[0]);
       }
     });
   }
-  fileBtn() {
-    findDOMNode(this.refs.fileInput).click();
-  }
+  fileBtn = () => {
+    this.fileInput.current.click();
+  };
   render() {
     const actions = [
       <Button label="Cancel" color="primary" onClick={this.handleClose} />,
@@ -148,12 +149,12 @@ export default class ArticleModal extends React.Component {
               <input
                 style={style.fileInput}
                 id="file-upload"
-                ref="fileInput"
+                ref={this.fileInput}
                 type="file"
               />
             </div>
             <div
-              ref="div1"
+              ref={this.div1}
               contentEditable="true"
               placeholder="請輸入文章內容"
               style={style.textarea}
