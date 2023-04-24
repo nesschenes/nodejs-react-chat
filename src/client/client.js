@@ -4,7 +4,6 @@ import { Provider } from "react-redux";
 import { configureStore } from "../redux/store";
 import { RouterProvider } from "react-router";
 import { createTheme, ThemeProvider } from "@mui/material";
-import { createBrowserHistory } from "history";
 import { createBrowserRouter } from "react-router-dom";
 import App from "../containers/App.js";
 import Chatroom from "../containers/Chatroom";
@@ -61,7 +60,6 @@ const router = createBrowserRouter([
 createRoot(document.getElementById("app")).render(
   <Provider store={store}>
     <ThemeProvider theme={theme}>
-      {/* <Router history={createBrowserHistory()} children={root} /> */}
       <RouterProvider
         router={router}
         fallbackElement={<h1>fallback router</h1>}
