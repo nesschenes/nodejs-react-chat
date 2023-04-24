@@ -1,38 +1,33 @@
-var webpack = require('webpack');
+const path = require("path");
+const webpack = require("webpack");
 
 module.exports = {
-  devtool: 'cheap-eval-source-map',
+  devtool: "eval-cheap-module-source-map",
+  mode: "development",
   entry: {
-    app:[
-    'webpack-hot-middleware/client',
-    './src/client/client.js'
-  ],
-},
-
-  output: {
-    path: require("path").resolve("./src/dist"),
-    filename: 'bundle.js',
-    publicPath: '/'
+    app: ["webpack-hot-middleware/client", "./src/client/client.js"],
   },
-  plugins: [
-    new webpack.optimize.OccurrenceOrderPlugin(),
-    new webpack.HotModuleReplacementPlugin(),
-  ],
+  output: {
+    path: path.resolve("./src/dist"),
+    filename: "bundle.js",
+    publicPath: "/",
+  },
+  plugins: [new webpack.HotModuleReplacementPlugin()],
   module: {
-    loaders: [
+    rules: [
       {
-        test: /\.js$/,
-        loader: 'babel-loader',
-        exclude: ['/node_modules/','/src/server/','/src/client',],
-        query: {
-          presets: ['react', 'es2015','stage-0', 'react-hmre'],
-          cacheDirectory: true
+        test: /\.(js|jsx)$/,
+        loader: "babel-loader",
+        exclude: [/node_modules/, /src\/server/],
+        options: {
+          presets: ["@babel/preset-env", "@babel/preset-react"],
+          cacheDirectory: true,
         },
       },
       {
         test: /\.css$/,
-        loader: 'style-loader!css-loader'
-      }
-    ]
-  }
-}
+        use: ["style-loader", "css-loader"],
+      },
+    ],
+  },
+};

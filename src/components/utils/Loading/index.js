@@ -1,7 +1,7 @@
-import React from 'react';
+import React from "react";
 
-if(typeof document !== 'undefined') {
-  require ('./index.css');
+if (typeof document !== "undefined") {
+  require("./index.css");
 }
 
 const Loading = (props) => (
@@ -13,6 +13,6 @@ const Loading = (props) => (
     <div className="rect5"></div>
     <div className="rect6"></div>
   </div>
-)
+);
 
 export default Loading;

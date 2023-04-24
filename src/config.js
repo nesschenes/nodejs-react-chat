@@ -1,9 +1,8 @@
-
 module.exports = {
-  email: '',
-  pass: '',
-  dbURL: 'mongodb://forclass1:test123@ds013898.mlab.com:13898/forclass',
-  jwtSecret: 'yicheng',
-  origin: 'http://localhost:3001'
-}
-
+  email: "",
+  pass: "",
+  dbURL:
+    "mongodb+srv://nesschen1101:OwpTq0GthcP42vLh@mycluster.z84gs3d.mongodb.net/?retryWrites=true&w=majority",
+  jwtSecret: "nessohohoh",
+  origin: "http://localhost:3001",
+};

@@ -1,53 +1,36 @@
-import React from 'react';
-import {List, ListItem} from 'material-ui/List';
-import Divider from 'material-ui/Divider';
-import Subheader from 'material-ui/Subheader';
-import Avatar from 'material-ui/Avatar';
-import {grey400, darkBlack, lightBlack} from 'material-ui/styles/colors';
-import IconButton from 'material-ui/IconButton';
-import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert';
-import IconMenu from 'material-ui/IconMenu';
-import MenuItem from 'material-ui/MenuItem';
+import { Avatar, Divider, List, ListItem, ListItemAvatar } from "@mui/material";
+import React from "react";
 
 const style = {
   author: {
-    fontSize: '10px',
-    color: 'gray',
-    textAlign: 'center'
-  }
-}
-
-const iconButtonElement = (
-  <IconButton
-    touch={true}
-    tooltip="more"
-    tooltipPosition="bottom-left"
-  >
-    <MoreVertIcon color={grey400} />
-  </IconButton>
-);
+    fontSize: "10px",
+    color: "gray",
+    textAlign: "center",
+  },
+  divider: {
+    my: 2,
+    mx: 3,
+    borderTop: "1px solid rgba(0, 0, 0, 0.12)",
+  },
+};
 
 const ListMsg = (props) => (
   <div>
-  {props.comments.map(i => (
-    <List key={i}>
-      <ListItem
-        leftAvatar = {
-          <div>
+    {props.comments.map((i) => (
+      <List key={i}>
+        <ListItem>
+          <ListItemAvatar>
             <Avatar src={i.userAvatar} />
             <div style={style.author}>{i.authorAccount}</div>
+          </ListItemAvatar>
+          <div>
+            <div style={{ color: "gray" }}>{i.title}</div>
+            <div style={{ marginTop: "10px" }}>{i.content}</div>
           </div>
-        }>
-        <div>
-          <div style={{color: 'gray'}}>{i.title}</div>
-          <div style={{marginTop: '10px'}}>{i.content}</div>
-        </div>
-      </ListItem>
-
-     <Divider inset={true} />
-    </List>
-  ))
-  }
+        </ListItem>
+        <Divider sx={style.divider} />
+      </List>
+    ))}
   </div>
 );
 

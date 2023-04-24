@@ -1,6 +1,6 @@
 //讓Node.js的程式碼compile
 
-require('babel-register')({
-  presets: ['es2015', 'react', 'stage-0']
+require("@babel/register")({
+  presets: ["@babel/preset-env", "@babel/preset-react"],
 });
-require('./server');
+require("./server");

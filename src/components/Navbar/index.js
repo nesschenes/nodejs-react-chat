@@ -1,45 +1,51 @@
-import React from 'react';
-import Drawer from 'material-ui/Drawer';
-import MenuItem from 'material-ui/MenuItem';
-import IconButton from 'material-ui/IconButton';
-import MainNavBtn from 'material-ui/svg-icons/action/toc';
-import { browserHistory } from 'react-router';
+import React from "react";
+import { Drawer, IconButton, MenuItem, Divider } from "@mui/material";
+import { MenuRounded, MenuOpen } from "@mui/icons-material";
+import { Navigate } from "react-router";
 
-export default class Navbar extends React.Component {
-
+class Navbar extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {open: false};
+    this.state = { open: false, navigateTo: "" };
   }
 
-  handleToggle = () => this.setState({open: !this.state.open});
+  handleToggle = () => this.setState({ open: !this.state.open });
 
   toArticle = () => {
-    browserHistory.push('/main')
-    this.setState({open: false});
-  }
+    this.setState({ open: false, navigateTo: "/main" });
+  };
 
-    toa = () => {
-      browserHistory.push('/chatroom')
-      this.setState({open: false});
-    }
+  toChatroom = () => {
+    this.setState({ open: false, navigateTo: "chatroom" });
+  };
 
   render() {
     return (
       <div>
-        <IconButton tooltip="主選單" onTouchTap={this.handleToggle}>
-          <MainNavBtn />
+        {this.state.navigateTo && <Navigate to={this.state.navigateTo} />}
+        <IconButton title="主選單" onClick={this.handleToggle}>
+          <MenuRounded />
         </IconButton>
         <Drawer
-          docked={false}
-          width={200}
+          disablePortal={true}
+          anchor={"left"}
+          sx={{ width: 800 }}
           open={this.state.open}
-          onRequestChange={(open) => this.setState({open})}
+          onClose={() => this.setState({ open: false })}
         >
-          <MenuItem onTouchTap={this.toArticle}>文章</MenuItem>
-          <MenuItem onTouchTap={this.toa}>在線聊天室</MenuItem>
+          <IconButton
+            sx={{ borderRadius: 0 }}
+            onClick={() => this.setState({ open: false })}
+          >
+            <MenuOpen />
+          </IconButton>
+          <Divider />
+          <MenuItem onClick={this.toArticle}>文章</MenuItem>
+          <MenuItem onClick={this.toChatroom}>在線聊天室</MenuItem>
         </Drawer>
       </div>
     );
   }
 }
+
+export default Navbar;

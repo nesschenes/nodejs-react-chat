@@ -1,7 +1,8 @@
-import React from 'react';
-import DropDownMenu from 'material-ui/DropDownMenu';
-import MenuItem from 'material-ui/MenuItem';
-import { browserHistory } from 'react-router';
+import { Settings } from "@mui/icons-material";
+import { Icon, IconButton, Menu as MenuObj, MenuItem } from "@mui/material";
+import { grey } from "@mui/material/colors";
+import React from "react";
+import { Navigate } from "react-router";
 
 const styles = {
   customWidth: {
@@ -9,45 +10,82 @@ const styles = {
   },
 };
 
-export default class DropDownMenuSimpleExample extends React.Component {
+const iconButtonElement = (
+  <IconButton touch={true} tooltip="選單" tooltipPosition="bottom-left">
+    <Icon color={grey[400]} />
+  </IconButton>
+);
 
+class Menu extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {value: 1};
+    const anchorEl = null;
+    this.state = {
+      navigateTo: "",
+      selectedIndex: 1,
+      anchorEl: anchorEl,
+    };
   }
 
-  handleChange = (event, index, value) => {
+  handleMenuItemClick = (event, index) => {
+    this.setState({ selectedIndex: index });
+    setAnchorEl(null);
+  };
 
-    console.log(index)
-    switch (index) {
-      case 1:
-        browserHistory.push('/personalinfo');
-        return
-      case 2:
-        browserHistory.push('/myarticle');
-        return
-      case 3:
-        this.props.logout();
-        return
-      default:return
-    }
+  handleClick = (event) => {
+    this.setState({ anchorEl: event.currentTarget });
+  };
+
+  handleClose = (event) => {
+    this.setState({ anchorEl: null });
+  };
+
+  handlePersonal = () => {
+    this.setState({ navigateTo: "/personalinfo" });
+    this.handleClose();
+  };
+
+  handleMyArticle = () => {
+    this.setState({ navigateTo: "/myarticle" });
+    this.handleClose();
+  };
+
+  handleLogout = () => {
+    this.props.logout();
   };
 
   render() {
+    const open = Boolean(this.state.anchorEl);
     return (
       <div>
-        <DropDownMenu
-          value={this.state.value}
+        {this.state.navigateTo && <Navigate to={this.state.navigateTo} />}
+        <IconButton
+          color="primary"
+          aria-label="設定"
+          component="label"
+          onClick={this.handleClick}
+          sx={{ color: grey[800], margin: "10px" }}
+        >
+          <Settings />
+        </IconButton>
+        <IconButton onClick={this.handleClick}></IconButton>
+        <MenuObj
+          anchorEl={this.state.anchorEl}
           onChange={this.handleChange}
           style={styles.customWidth}
-          autoWidth={false}
+          sx={{ width: "auto" }}
+          open={open}
         >
-          <MenuItem value={1} primaryText={ `使用者： ${this.props.title}` } />
-          <MenuItem value={2} primaryText="個人資料設定" />
-          <MenuItem value={3} primaryText="我的文章" />
-          <MenuItem value={4} primaryText="登出" />
-        </DropDownMenu>
+          <MenuItem onClick={this.handleClose}>
+            使用者： {this.props.title}
+          </MenuItem>
+          <MenuItem onClick={this.handlePersonal}>個人資料設定</MenuItem>
+          <MenuItem onClick={this.handleMyArticle}>我的文章</MenuItem>
+          <MenuItem onClick={this.handleLogout}>登出</MenuItem>
+        </MenuObj>
       </div>
     );
   }
 }
+
+export default Menu;
