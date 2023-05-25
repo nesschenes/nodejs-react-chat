@@ -22,7 +22,7 @@ const authToken = (req, res, next) => {
 };
 
 exports.api = (app) => {
-  app.use("*", function (req, res, next) {
+  app.use("*", (req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
     res.header(
       "Access-Control-Allow-Methods",
@@ -33,7 +33,7 @@ exports.api = (app) => {
     next();
   });
 
-  app.get("/getArticle", function (req, res) {
+  app.get("/getArticle", (req, res) => {
     Post.find({})
       .sort({ lastModify: -1 })
       .then((data) => {
@@ -42,7 +42,7 @@ exports.api = (app) => {
   });
 
   ///這裡如發出get並且在server重啟第一次的情況，在login.js的getuser的get會延遲，但開devtool disable cache又不會，改成post則沒這問題
-  app.post("/getUser", function (req, res) {
+  app.post("/getUser", (req, res) => {
     if (req.session.user) {
       User.find(
         { account: req.session.user },
@@ -97,7 +97,7 @@ exports.api = (app) => {
     });
   });
 
-  app.post("/login", function (req, res) {
+  app.post("/login", (req, res) => {
     User.find({ account: req.body.account }).then((data) => {
       if (data[0] === undefined) {
         res.end("帳號或密碼錯誤");
@@ -236,7 +236,7 @@ exports.api = (app) => {
       });
   });
 
-  app.post("/logout", function (req, res) {
+  app.post("/logout", (req, res) => {
     res.cookie("ifUser", true, { expires: new Date() });
     res.cookie("t", true, { expires: new Date() });
     res.cookie("a1", true, { expires: new Date() });
@@ -245,7 +245,7 @@ exports.api = (app) => {
     res.end();
   });
 
-  app.post("/signup", function (req, res) {
+  app.post("/signup", (req, res) => {
     User.find({ account: req.body.account })
       .then((data) => {
         if (data[0] !== undefined) {
@@ -290,7 +290,7 @@ exports.api = (app) => {
       .catch((err) => console.log(err));
   });
 
-  app.post("/postArticle", authToken, function (req, res) {
+  app.post("/postArticle", authToken, (req, res) => {
     if (typeof req.session.user === "string") {
       let post = new Post({
         posterAccount: req.body.account,
@@ -314,8 +314,8 @@ exports.api = (app) => {
     }
   });
 
-  app.put("/UpdateUserInfo", authToken, (req, res) => {
-    User.update(
+  app.put("/updateUserInfo", authToken, (req, res) => {
+    User.updateOne(
       { account: req.body.account },
       {
         avatar: req.body.avatar,
@@ -333,7 +333,7 @@ exports.api = (app) => {
   });
 
   app.put("/updateArticle", authToken, (req, res) => {
-    Post.update(
+    Post.updateOne(
       { _id: req.body.id },
       {
         $set: {
@@ -355,7 +355,7 @@ exports.api = (app) => {
         userAvatar: req.body.userAvatar,
         date: Date.now() + 1000 * 60 * 60 * 8,
       });
-      Post.update(
+      Post.updateOne(
         { _id: req.body.id },
         {
           $set: {

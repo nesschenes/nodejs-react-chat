@@ -10,12 +10,12 @@ import Chatroom from "../containers/Chatroom.js";
 
 export default (
   <Routes>
-    <Route path="/" component={App} />
-    <Route path="chatroom" component={Chatroom} />
-    <Route path="main" component={Main} />
-    <Route path="login" component={Login} />
-    <Route path="register" component={Register} />
-    <Route path="personalinfo" component={PersonalInfo} />
-    <Route path="myarticle" component={MyArticle} />
+    <Route path="/" element={<App />} />
+    <Route path="chatroom" element={<Chatroom />} />
+    <Route path="main" element={<Main />} />
+    <Route path="login" element={<Login />} />
+    <Route path="register" element={<Register />} />
+    <Route path="personalinfo" element={<PersonalInfo />} />
+    <Route path="myarticle" element={<MyArticle />} />
   </Routes>
 );

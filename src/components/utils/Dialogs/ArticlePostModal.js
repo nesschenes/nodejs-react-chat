@@ -1,6 +1,12 @@
 import React, { createRef } from "react";
 import axios from "axios";
-import { Button, Dialog } from "@mui/material";
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  Input,
+} from "@mui/material";
 import socket from "../../../client/socket";
 
 const style = {
@@ -82,84 +88,85 @@ export default class ArticleModal extends React.Component {
         this.props.context.setState({ loading: false });
       });
   };
-  componentDidMount() {
-    this.div1.current.addEventListener("keydown", (e) => {
-      console.log(this.div1.current.innerHTML);
-      this.setState({ content: this.div1.current.innerHTML });
-    });
-    const context = this;
-    context.fileInput.current.addEventListener("change", () => {
-      if (
-        context.fileInput.current.files &&
-        context.fileInput.current.files[0]
-      ) {
-        const FR = new FileReader();
-        FR.onload = function (e) {
-          const base64 = e.target.result.replace(
-            /^data:image\/(png|jpg);base64,/,
-            ""
-          );
+  // componentDidMount() {
+  //   this.div1.current.addEventListener("keydown", (e) => {
+  //     console.log(this.div1.current.innerHTML);
+  //     this.setState({ content: this.div1.current.innerHTML });
+  //   });
+  //   const context = this;
+  //   context.fileInput.current.addEventListener("change", () => {
+  //     if (
+  //       context.fileInput.current.files &&
+  //       context.fileInput.current.files[0]
+  //     ) {
+  //       const FR = new FileReader();
+  //       FR.onload = function (e) {
+  //         const base64 = e.target.result.replace(
+  //           /^data:image\/(png|jpg);base64,/,
+  //           ""
+  //         );
 
-          const xhttp = new XMLHttpRequest();
-          xhttp.open("POST", "https://api.imgur.com/3/image", true);
-          xhttp.setRequestHeader("Content-type", "application/json");
-          xhttp.setRequestHeader("Authorization", "Client-ID a2986d9a6c4e01c");
-          xhttp.send(JSON.stringify({ image: base64 }));
-          xhttp.onreadystatechange = function () {
-            if (xhttp.readyState == 4 && xhttp.status == 200) {
-              const para = document.createElement("img");
-              para.height = 150;
-              para.src = JSON.parse(xhttp.responseText).data.link;
-              context.fileInput.current.appendChild(para);
-            }
-          };
-        };
-        FR.readAsDataURL(context.fileInput.current.files[0]);
-      }
-    });
-  }
+  //         const xhttp = new XMLHttpRequest();
+  //         xhttp.open("POST", "https://api.imgur.com/3/image", true);
+  //         xhttp.setRequestHeader("Content-type", "application/json");
+  //         xhttp.setRequestHeader("Authorization", "Client-ID a2986d9a6c4e01c");
+  //         xhttp.send(JSON.stringify({ image: base64 }));
+  //         xhttp.onreadystatechange = function () {
+  //           if (xhttp.readyState == 4 && xhttp.status == 200) {
+  //             const para = document.createElement("img");
+  //             para.height = 150;
+  //             para.src = JSON.parse(xhttp.responseText).data.link;
+  //             context.fileInput.current.appendChild(para);
+  //           }
+  //         };
+  //       };
+  //       FR.readAsDataURL(context.fileInput.current.files[0]);
+  //     }
+  //   });
+  // }
   fileBtn = () => {
     this.fileInput.current.click();
   };
   render() {
-    const actions = [
-      <Button label="Cancel" color="primary" onClick={this.handleClose} />,
-      <Button label="Submit" color="primary" onClick={this.handleConfirm} />,
-    ];
-
     return (
       <div>
         <Dialog
           title="發表文章"
-          actions={actions}
-          modal={true}
           open={this.props.context.state.articlePostModal}
-          contentStyle={style.contentStyle}
-          bodyStyle={style.bodyStyle}
         >
-          <div style={{ height: "600px" }}>
-            <input
-              style={style.title}
-              maxLength={15}
-              placeholder="請輸入標題"
-              onChange={(e) => this.titleInput(e)}
-            ></input>
-            <div>
-              <button onClick={() => this.fileBtn()} style={style.picBtn} />
+          <DialogContent style={style.contentStyle}>
+            <div style={{ height: "600px" }}>
               <input
-                style={style.fileInput}
-                id="file-upload"
-                ref={this.fileInput}
-                type="file"
-              />
+                style={style.title}
+                maxLength={15}
+                placeholder="請輸入標題"
+                onChange={(e) => this.titleInput(e)}
+              ></input>
+              <div>
+                <Button onClick={() => this.fileBtn()} style={style.picBtn} />
+                <Input
+                  style={style.fileInput}
+                  id="file-upload"
+                  ref={this.fileInput}
+                  type="file"
+                />
+              </div>
+              <div
+                ref={this.div1}
+                contentEditable="true"
+                placeholder="請輸入文章內容"
+                style={style.textarea}
+              ></div>
             </div>
-            <div
-              ref={this.div1}
-              contentEditable="true"
-              placeholder="請輸入文章內容"
-              style={style.textarea}
-            ></div>
-          </div>
+          </DialogContent>
+          <DialogActions>
+            <Button color="primary" onClick={this.handleClose}>
+              Cancel
+            </Button>
+            <Button color="primary" onClick={this.handleConfirm}>
+              Submit
+            </Button>
+          </DialogActions>
         </Dialog>
       </div>
     );

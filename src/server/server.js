@@ -1,21 +1,26 @@
-//引入及初始化Express
-var express = require("express");
-var app = express();
-
-//引入socket.io
-var http = require("http").Server(app);
-var io = require("socket.io")(http);
-
-//引入自訂的相關config設定
 import config1 from "../config.js";
 
+// Initialize the express
+import express from "express";
+const app = express();
+
+import { Server } from "http";
+import socket from "socket.io";
+// Prepare the socket
+const server = Server(app);
+const io = socket(server, {
+  cors: {
+    origin: "*",
+  },
+});
+
 //引入webpack
-var path = require("path");
-var config = require("../../webpack.config.js");
-var webpack = require("webpack");
-var webpackDevMiddleware = require("webpack-dev-middleware");
-var webpackHotMiddleware = require("webpack-hot-middleware");
-var compiler = webpack(config);
+import path from "path";
+import config from "../../webpack.config";
+import webpack from "webpack";
+import webpackDevMiddleware from "webpack-dev-middleware";
+import webpackHotMiddleware from "webpack-hot-middleware";
+const compiler = webpack(config);
 app.use(
   webpackDevMiddleware(compiler, {
     publicPath: config.output.publicPath,
@@ -24,8 +29,8 @@ app.use(
 app.use(webpackHotMiddleware(compiler));
 
 //引用Express中解析Post的body與cookie的模組
-var bodyParser = require("body-parser");
-var cookieParser = require("cookie-parser");
+import bodyParser from "body-parser";
+import cookieParser from "cookie-parser";
 
 //使用axios(一個簡單發出http request的第三方模組)
 import axios from "axios";
@@ -37,8 +42,8 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 
 //引入Express 第三方的session中間件，用來儲存使用者登入session
-const session = require("express-session");
-const MongoStore = require("connect-mongo");
+import session from "express-session";
+import MongoStore from "connect-mongo";
 app.use(
   session({
     saveUninitialized: false, // don't create session until something stored
@@ -66,22 +71,32 @@ api(app);
 
 //引入React
 import React from "react";
-
-//因此為React server side render所以需要將client端的router與redux的store引入
 import { renderToString } from "react-dom/server";
-import { RouterContext, match, createRoutesFromChildren } from "react-router";
+import {
+  RouterContext,
+  createRoutesFromChildren,
+  matchRoutes,
+  Routes,
+  Route,
+  Router,
+} from "react-router";
 import root from "../client/root.js";
 const routes = createRoutesFromChildren(root.props.children);
 import { Provider } from "react-redux";
 import { configureStore } from "../redux/store";
-
-//Material UI在 server side render時所需要引入的內容(官網可參考)
 import { createTheme, ThemeProvider } from "@mui/material";
+import {
+  createStaticRouter,
+  StaticRouter,
+  StaticRouterProvider,
+} from "react-router-dom/server";
+import { matchPath } from "react-router";
+import { createStaticHandler } from "@remix-run/router";
 
 //以下為React server side render的基本配備
 app.get("*", (req, res) => {
   //設定Redux一開始的state，用來直接server side render資料
-  let initialState = {
+  const initialState = {
     userInfo: {
       login: false,
     },
@@ -89,7 +104,7 @@ app.get("*", (req, res) => {
   };
 
   axios
-    .get(`http://localhost:3001/getArticle`) //axios在isomophic的情況中須加上完整域名
+    .get(`${config1.origin}/getArticle`) //axios在isomophic的情況中須加上完整域名
     .then((response) => {
       //把ajax後的資料放入上面的initialState，並給server做render
       initialState.article = response.data;
@@ -100,34 +115,62 @@ app.get("*", (req, res) => {
         userAgent: req.headers["user-agent"],
       });
 
-      //server 根據http status code決定要做什麼處理
-      match(
-        { routes, location: req.url },
-        (error, redirectLocation, renderProps) => {
-          if (error) {
-            res.status(500).send(error.message);
-          } else if (redirectLocation) {
-            res.redirect(
-              302,
-              redirectLocation.pathname + redirectLocation.search
-            );
-          } else if (renderProps) {
-            //使用renderToString 把React component轉為string以做Server side render
-            const content = renderToString(
-              <Provider store={store}>
-                <ThemeProvider muiTheme={muiTheme}>
-                  <RouterContext {...renderProps} />
-                </ThemeProvider>
-              </Provider>
-            );
-            let state = store.getState();
-            let page = renderFullPage(content, state); //把html與state做結合
-            return res.status(200).send(page); //把我們的html送出到client端
-          } else {
-            res.status(404).send("Not Found");
-          }
+      const matchedRoutes = matchRoutes(routes, req.url);
+      const promises = matchedRoutes.map(({ route, match }) => {
+        if (route.loadData) {
+          return route.loadData(store.dispatch, match);
         }
-      );
+      });
+      const context = {};
+      Promise.all(promises)
+        .then(() => {
+          const content = renderToString(
+            <Provider store={store}>
+              <ThemeProvider theme={muiTheme}>
+                <StaticRouter location={req.url} context={context}>
+                  <Routes routes={routes} />
+                </StaticRouter>
+              </ThemeProvider>
+            </Provider>
+          );
+
+          const state = store.getState();
+          const page = renderFullPage(content, state);
+          res.status(context.statusCode || 200).send(page);
+        })
+        .catch((error) => {
+          console.error(error);
+          res.status(500).send(error.message);
+        });
+
+      //   //server 根據http status code決定要做什麼處理
+      //   match(
+      //     { routes, location: req.url },
+      //     (error, redirectLocation, renderProps) => {
+      //       if (error) {
+      //         res.status(500).send(error.message);
+      //       } else if (redirectLocation) {
+      //         res.redirect(
+      //           302,
+      //           redirectLocation.pathname + redirectLocation.search
+      //         );
+      //       } else if (renderProps) {
+      //         //使用renderToString 把React component轉為string以做Server side render
+      //         const content = renderToString(
+      //           <Provider store={store}>
+      //             <ThemeProvider muiTheme={muiTheme}>
+      //               <RouterContext {...renderProps} />
+      //             </ThemeProvider>
+      //           </Provider>
+      //         );
+      //         const state = store.getState();
+      //         const page = renderFullPage(content, state); //把html與state做結合
+      //         return res.status(200).send(page); //把我們的html送出到client端
+      //       } else {
+      //         res.status(404).send("Not Found");
+      //       }
+      //     }
+      //   );
     })
     .catch((err) => {
       console.log(err);
@@ -166,9 +209,9 @@ const renderFullPage = (html, preloadedState) => `
 </html>
 `;
 
-var port = 3001;
+const port = 3001;
 
-http.listen(port, "127.0.0.1", function (error) {
+server.listen(port, "localhost", (error) => {
   if (error) throw error;
   console.log("Express server listening on port", port);
 });

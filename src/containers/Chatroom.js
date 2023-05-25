@@ -5,6 +5,7 @@ import axios from "axios";
 import { Avatar, Button, Icon, IconButton, TextField } from "@mui/material";
 import socket from "../client/socket.js";
 import { Navigate } from "react-router";
+import Swal from "sweetalert2";
 
 const style = {
   container: {
@@ -85,7 +86,10 @@ class Chatroom extends Component {
       .then((response) => {
         if (response.data.result === -1) {
           context.setState({ navigateTo: "/main" });
-          sweetAlert("請先登入，才能進入聊天室");
+          Swal.fire({
+            text: "請先登入，才能進入聊天室",
+            icon: "error",
+          });
           return;
         }
         socket.emit("chatPage", {

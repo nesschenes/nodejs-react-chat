@@ -16,16 +16,16 @@ const style = {
 
 const ListMsg = (props) => (
   <div>
-    {props.comments.map((i) => (
-      <List key={i}>
+    {props.comments.map((c, index) => (
+      <List key={index}>
         <ListItem>
           <ListItemAvatar>
-            <Avatar src={i.userAvatar} />
-            <div style={style.author}>{i.authorAccount}</div>
+            <Avatar src={c.userAvatar} />
+            <div style={style.author}>{c.authorAccount}</div>
           </ListItemAvatar>
           <div>
-            <div style={{ color: "gray" }}>{i.title}</div>
-            <div style={{ marginTop: "10px" }}>{i.content}</div>
+            <div style={{ color: "gray" }}>{c.title}</div>
+            <div style={{ marginTop: "10px" }}>{c.content}</div>
           </div>
         </ListItem>
         <Divider sx={style.divider} />

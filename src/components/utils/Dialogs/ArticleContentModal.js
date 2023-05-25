@@ -4,7 +4,13 @@ import ListMsg from "../../List.js";
 import LeaveMsgModal from "./LeaveMsgModal.js";
 import SimpleDialog from "../../utils/Dialogs/SimpleDialog.js";
 import Loading from "../Loading/";
-import { Button, Dialog } from "@mui/material";
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+} from "@mui/material";
 /**
  * A modal dialog can only be closed by selecting one of the actions.
  *
@@ -66,12 +72,15 @@ export default class ArticleContentModal extends React.Component {
     };
   }
   componentDidMount() {
-    axios.get("articles/" + this.props.activeArticle._id).then((response) => {
-      console.log(response.data);
-      this.setState({ comments: response.data.comments }, () => {
-        this.setState({ loading: false });
+    const context = this;
+    axios
+      .get("/articles/" + context.props.activeArticle._id)
+      .then((response) => {
+        console.log(response.data);
+        context.setState({ comments: response.data.comments }, () => {
+          context.setState({ loading: false });
+        });
       });
-    });
   }
   handleClose = () => {
     this.props.context.setState({ articleContentModal: false });
@@ -84,55 +93,60 @@ export default class ArticleContentModal extends React.Component {
     }
   };
   render() {
-    const action1 = [
-      <Button label="關閉" color="primary" onClick={this.handleClose} />,
-      <Button
-        label="確認"
-        color="primary"
-        onClick={this.props.context.handleConfirm}
-      />,
-    ];
-
-    const action2 = [
-      <Button label="留言" color="primary" onClick={this.levmsgModal} />,
-      <Button label="關閉" color="primary" onClick={this.handleClose} />,
-    ];
     return (
       <div>
         <Dialog
-          actionsContainerStyle={style.btn}
-          actions={this.props.confirmBtn ? action1 : action2}
-          modal={false}
           open={this.props.context.state.articleContentModal}
-          contentStyle={style.contentStyle}
-          bodyStyle={style.bodyStyle}
-          onRequestClose={this.handleClose}
-          autoScrollBodyContent={true}
+          onClose={this.handleClose}
         >
-          <div style={style.titleContainer}>
-            <div style={style.title}>{this.props.activeArticle.title}</div>
-            <div style={style.date}>
-              發文日期：
-              {this.props.activeArticle.PostDate.replace(/[A-Z]/g, " ")}
+          <DialogTitle style={style.title}>
+            {this.props.activeArticle.title}
+          </DialogTitle>
+          <DialogContent style={style.contentStyle}>
+            <div style={{ height: "700px" }}>
+              <div
+                contentEditable={this.props.contentEditable}
+                ref="div1"
+                style={style.textarea}
+                dangerouslySetInnerHTML={{
+                  __html: this.props.activeArticle.content,
+                }}
+              ></div>
             </div>
-          </div>
-          <div style={{ height: "700px" }}>
-            <div
-              contentEditable={this.props.contentEditable}
-              ref="div1"
-              style={style.textarea}
-              dangerouslySetInnerHTML={{
-                __html: this.props.activeArticle.content,
-              }}
-            ></div>
-          </div>
-          <div style={style.levmsgLine}></div>
-          <div style={style.levmsgTitle}>留言內容</div>
-          {this.state.loading ? <Loading /> : ""}
-          <ListMsg comments={this.state.comments} />
-          {this.state.leaveMsgModal ? <LeaveMsgModal context={this} /> : ""}
-          {this.state.dialog ? <SimpleDialog context={this} /> : ""}{" "}
-          {/* 未登入*/}
+            發文日期：
+            {this.props.activeArticle.PostDate.replace(/[A-Z]/g, " ")}
+            <div style={style.levmsgLine}></div>
+            <div style={style.levmsgTitle}>留言內容</div>
+            {this.state.loading ? <Loading /> : ""}
+            <ListMsg comments={this.state.comments} />
+            {this.state.leaveMsgModal ? <LeaveMsgModal context={this} /> : ""}
+            {this.state.dialog ? <SimpleDialog context={this} /> : ""}{" "}
+            {/* 未登入*/}
+          </DialogContent>
+          <DialogActions>
+            {this.props.confirmBtn ? (
+              <>
+                <Button color="primary" onClick={this.handleClose}>
+                  關閉
+                </Button>
+                <Button
+                  color="primary"
+                  onClick={this.props.context.handleConfirm}
+                >
+                  確認
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button color="primary" onClick={this.levmsgModal}>
+                  留言
+                </Button>
+                <Button color="primary" onClick={this.handleClose}>
+                  關閉
+                </Button>
+              </>
+            )}
+          </DialogActions>
         </Dialog>
       </div>
     );

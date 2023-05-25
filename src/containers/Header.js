@@ -41,7 +41,7 @@ class Header extends Component {
 
     ///////////////////////////////
 
-    window.fbAsyncInit = function () {
+    window.fbAsyncInit = () => {
       FB.init({
         appId: "259990304339055",
         cookie: true, // enable cookies to allow the server to access

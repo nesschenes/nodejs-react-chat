@@ -1,6 +1,7 @@
 import React from "react";
 import axios from "axios";
-import { Button, Dialog } from "@mui/material";
+import { Button, Dialog, DialogActions, DialogContent } from "@mui/material";
+import Swal from "sweetalert2";
 /**
  * A modal dialog can only be closed by selecting one of the actions.
  *
@@ -59,10 +60,24 @@ export default class LeaveMsgModal extends React.Component {
         userAvatar: this.props.context.props.context.props.user.avatar,
       })
       .then((response) => {
-        sweetAlert("留言成功");
+        Swal.fire({
+          target: document.getElementById("swal2-container"),
+          customClass: {
+            container: "swal2-container",
+          },
+          text: "留言成功",
+          icon: "success",
+        });
       })
       .catch((err) => {
-        sweetAlert("留言失敗，請重試");
+        Swal.fire({
+          target: document.getElementById("swal2-container"),
+          customClass: {
+            container: "swal2-container",
+          },
+          text: "留言失敗，請重試",
+          icon: "error",
+        });
       });
   };
   handleClose = () => {
@@ -72,28 +87,36 @@ export default class LeaveMsgModal extends React.Component {
     this.setState({ title: e.target.value });
   };
   render() {
-    const action1 = [
-      <Button label="取消" color="primary" onClick={this.handleClose} />,
-      <Button label="確認" color="primary" onClick={this.handleLeaveMsg} />,
-    ];
     return (
       <div>
         <Dialog
-          actions={action1}
-          modal={false}
           open={this.props.context.state.leaveMsgModal}
-          contentStyle={style.contentStyle}
-          onRequestClose={this.handleClose}
+          onClose={this.handleClose}
         >
-          <input
-            onChange={(e) => this.titleInput(e)}
-            placeholder="請輸入標題"
-            style={style.titleInput}
-            maxLength="15"
-          ></input>
-          <div style={{ height: "100px" }}>
-            <div contentEditable={true} ref="div1" style={style.textarea}></div>
-          </div>
+          <DialogContent style={style.contentStyle}>
+            <input
+              onChange={(e) => this.titleInput(e)}
+              placeholder="請輸入標題"
+              style={style.titleInput}
+              maxLength="15"
+            ></input>
+            <div style={{ height: "100px" }}>
+              <div
+                contentEditable={true}
+                ref="div1"
+                style={style.textarea}
+              ></div>
+            </div>
+          </DialogContent>
+          <DialogActions>
+            <Button color="primary" onClick={this.handleClose}>
+              取消
+            </Button>
+            ,
+            <Button color="primary" onClick={this.handleLeaveMsg}>
+              確認
+            </Button>
+          </DialogActions>
         </Dialog>
       </div>
     );

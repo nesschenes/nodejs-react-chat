@@ -19,7 +19,7 @@ class App extends Component {
       localStorage.setItem("reloadFlag", false);
     }
     //fb sdk import
-    (function (d, s, id) {
+    ((d, s, id) => {
       var js,
         fjs = d.getElementsByTagName(s)[0];
       if (d.getElementById(id)) return;

@@ -22,33 +22,34 @@ class Register extends Component {
       dialog: false,
       dialogText: "",
       navigateTo: "",
+      error: false,
     };
   }
-  checkAccount(e) {
+  checkAccount = (e) => {
     this.state.account = e.target.value;
     if (e.target.value === "" || e.target.value.length > 12) {
       this.setState({ accountCheck: false });
       return;
     }
     this.setState({ accountCheck: true });
-  }
-  checkPassword(e) {
+  };
+  checkPassword = (e) => {
     this.state.password = e.target.value;
     if (e.target.value === "" || e.target.value.length < 6) {
       this.setState({ passwordCheck: false });
       return;
     }
     this.setState({ passwordCheck: true });
-  }
-  checkPassword1(e) {
+  };
+  checkPassword1 = (e) => {
     this.state.password1 = e.target.value;
     if (e.target.value === "" || e.target.value !== this.state.password) {
       this.setState({ password1Check: false });
       return;
     }
     this.setState({ password1Check: true });
-  }
-  checkEmail(e) {
+  };
+  checkEmail = (e) => {
     function validateEmail(email) {
       const re =
         /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -60,52 +61,56 @@ class Register extends Component {
       return;
     }
     this.setState({ emailCheck: true });
-  }
-  checkNickName(e) {
+  };
+  checkNickName = (e) => {
     this.state.nickName = e.target.value;
     if (e.target.value === "") {
       this.setState({ checkNickName: false });
       return;
     }
     this.setState({ checkNickName: true });
-  }
-  sendRequest() {
-    const context = this; //因then會找不到this
+  };
+  sendRequest = () => {
+    const context = this;
     if (
-      this.state.account === "" ||
-      this.state.password === "" ||
-      this.state.password1 === "" ||
-      this.state.email === "" ||
-      this.state.nickName === ""
+      context.state.account === "" ||
+      context.state.password === "" ||
+      context.state.password1 === "" ||
+      context.state.email === "" ||
+      context.state.nickName === ""
     ) {
-      this.setState({ dialog: true });
-      this.setState({ dialogText: "您好，請填完所有欄位再點選" });
+      context.setState({ dialog: true });
+      context.setState({ dialogText: "請先填完所有欄位" });
+      context.setState({ error: true });
       return;
     }
     axios
       .post("/signup", {
-        account: this.state.account,
-        password: this.state.password,
-        email: this.state.email,
-        nickName: this.state.nickName,
+        account: context.state.account,
+        password: context.state.password,
+        email: context.state.email,
+        nickName: context.state.nickName,
       })
-      .then(function (response) {
+      .then((response) => {
         context.setState({ dialogText: response.data });
         context.setState({ dialog: true });
       })
-      .catch(function (error) {
+      .catch((error) => {
         console.log(error);
       });
-  }
+  };
   dialogConfirm = () => {
-    this.setState({ navigateTo: "/login" });
+    this.setState({ dialog: false });
+    if (!this.state.error) {
+      this.setState({ navigateTo: "/login" });
+    }
   };
   render() {
     return (
       <div style={style.container}>
         {this.state.navigateTo && <Navigate to={this.state.navigateTo} />}
         <TextField
-          onBlur={(e) => this.checkAccount(e)}
+          onBlur={this.checkAccount}
           InputLabelProps={{ shrink: true }}
           sx={{ color: "gray", margin: "10px" }}
           label="帳號"
@@ -116,7 +121,7 @@ class Register extends Component {
         />
         <br />
         <TextField
-          onBlur={(e) => this.checkPassword(e)}
+          onBlur={this.checkPassword}
           type="password"
           InputLabelProps={{ shrink: true }}
           sx={{ color: "gray", margin: "10px" }}
@@ -128,7 +133,7 @@ class Register extends Component {
         />
         <br />
         <TextField
-          onBlur={(e) => this.checkPassword1(e)}
+          onBlur={this.checkPassword1}
           type="password"
           InputLabelProps={{ shrink: true }}
           sx={{ color: "gray", margin: "10px" }}
@@ -140,7 +145,7 @@ class Register extends Component {
         />
         <br />
         <TextField
-          onBlur={(e) => this.checkEmail(e)}
+          onBlur={this.checkEmail}
           InputLabelProps={{ shrink: true }}
           sx={{ color: "gray", margin: "10px" }}
           label="E-mail"
@@ -149,7 +154,7 @@ class Register extends Component {
         />
         <br />
         <TextField
-          onBlur={(e) => this.checkNickName(e)}
+          onBlur={this.checkNickName}
           InputLabelProps={{ shrink: true }}
           sx={{ color: "gray", margin: "10px" }}
           label="暱稱"
@@ -157,11 +162,11 @@ class Register extends Component {
           helperText={this.state.checkNickName ? "" : "欄位不可為空白"}
         />
         <br />
-        <Button onClick={() => this.sendRequest()}>註冊</Button>
+        <Button onClick={this.sendRequest}>註冊</Button>
         {this.state.dialog ? (
           <SimpleDialog
             content={this.state.dialogText}
-            confirm={() => this.dialogConfirm()}
+            confirm={this.dialogConfirm}
             context={this}
           />
         ) : (

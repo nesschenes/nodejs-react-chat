@@ -45,9 +45,9 @@ class PersonalInfo extends Component {
     }
     this.setState({ [type]: true });
   };
-  sendRequest() {
+  sendRequest = () => {
     axios
-      .put("/UpdateUserInfo", {
+      .put("/updateUserInfo", {
         account: this.props.userInfo.account,
         avatar: this.props.userInfo.avatar,
         name: this.state.name,
@@ -57,7 +57,7 @@ class PersonalInfo extends Component {
         birthday: this.state.date,
       })
       .then((response) => alert(response.data));
-  }
+  };
 
   componentDidMount() {
     const context = this;
@@ -72,7 +72,7 @@ class PersonalInfo extends Component {
             /^data:image\/(png|jpg|jpeg);base64,/,
             ""
           );
-          console.log(base64);
+          // console.log(base64);
           const xhttp = new XMLHttpRequest();
           xhttp.open("POST", "https://api.imgur.com/3/image", true);
           xhttp.setRequestHeader("Content-type", "application/json");
@@ -83,7 +83,7 @@ class PersonalInfo extends Component {
               const avatarSrc = JSON.parse(xhttp.responseText).data.link;
               context.avatar.current.src = avatarSrc;
               axios
-                .put("/UpdateUserInfo", {
+                .put("/updateUserInfo", {
                   avatar: avatarSrc,
                   account: context.props.userInfo.account,
                   name: context.state.name,
@@ -95,6 +95,9 @@ class PersonalInfo extends Component {
                 .then((res) => {
                   console.log(res.data);
                   location.reload();
+                })
+                .catch((err) => {
+                  console.error(err);
                 });
             }
           };

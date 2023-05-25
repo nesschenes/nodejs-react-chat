@@ -1,34 +1,24 @@
-import React, { Component } from "react";
+import React, { Component, createRef } from "react";
 import { connect } from "react-redux";
 import axios from "axios";
 import Loading from "../components/utils/Loading/";
 import ArticleContentModal from "./utils/Dialogs/ArticleContentModal.js";
 import { editArticle } from "../redux/actions/article.js";
 import {
+  Button,
   Divider,
   Icon,
   IconButton,
   List,
   ListItem,
+  ListItemSecondaryAction,
   ListItemText,
   ListSubheader,
   Menu,
   MenuItem,
+  Typography,
 } from "@mui/material";
 import { grey } from "@mui/material/colors";
-
-const iconButtonElement = (
-  <IconButton touch={true} tooltip="選單" tooltipPosition="bottom-left">
-    <Icon color={grey[400]} />
-  </IconButton>
-);
-
-const rightIconMenu = (context, article) => (
-  <Menu anchorEl={iconButtonElement} open={true}>
-    <MenuItem onClick={() => context.clickArticle(article._id)}>修改</MenuItem>
-    <MenuItem>刪除</MenuItem>
-  </Menu>
-);
 
 class MyArticle extends Component {
   constructor(props) {
@@ -41,6 +31,7 @@ class MyArticle extends Component {
       activeArticle: "",
       content: "",
     };
+    this.iconRef = createRef();
   }
 
   clickArticle(id) {
@@ -140,9 +131,6 @@ class MyArticle extends Component {
             return (
               <div key={idx}>
                 <ListItem>
-                  <ListItemSecondaryAction>
-                    {rightIconMenu(this, article)}
-                  </ListItemSecondaryAction>
                   <ListItemText
                     primary={"作者：" + article.author}
                     secondary={
@@ -152,7 +140,7 @@ class MyArticle extends Component {
                         sx={{ whiteSpace: "normal", lineHeight: "1.4" }}
                       >
                         <p>
-                          <span style={{ color: darkBlack }}>
+                          <span style={{ color: "darkgrey" }}>
                             標題：{article.title}
                           </span>
                           <br />
@@ -161,6 +149,12 @@ class MyArticle extends Component {
                       </Typography>
                     }
                   ></ListItemText>
+                  <ListItemSecondaryAction>
+                    <Button onClick={() => this.clickArticle(article._id)}>
+                      修改
+                    </Button>
+                    {/* <Button>刪除</Button> */}
+                  </ListItemSecondaryAction>
                 </ListItem>
                 <Divider
                   sx={{

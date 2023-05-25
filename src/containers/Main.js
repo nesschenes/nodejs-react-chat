@@ -9,6 +9,8 @@ import Loading from "../components/utils/Loading/";
 import axios from "axios";
 import { Button, TextField } from "@mui/material";
 import socket from "../client/socket.js";
+import Swal from "sweetalert2";
+import Header from "./Header.js";
 
 const style = {
   container: {},
@@ -37,17 +39,22 @@ class Main extends Component {
 
     axios
       .post("/getUser", {})
-      .then(function (response) {
+      .then((response) => {
         socket.emit("mainPage", {
           //使用者進入主頁
           name: response.data.name,
           account: response.data.account,
         });
       })
-      .catch(function (error) {
+      .catch((error) => {
         console.log(error);
       });
-    socket.on("addArticle", function (msg) {
+
+    axios.get("/getArticle").then((res) => {
+      this.setState({ FilterArticles: res.data });
+    });
+
+    socket.on("addArticle", (msg) => {
       //新增文章後的
       const payload = msg[0];
       context.props.addArticleAction({
@@ -64,45 +71,47 @@ class Main extends Component {
     });
   }
 
-  postArticle() {
+  postArticle = () => {
     this.setState({ articlePostModal: true });
-  }
-  articleClick(e, id) {
+  };
+  articleClick = (e, id) => {
     this.setState({ articleContentModal: true });
-    this.props.articles.forEach((i) => {
+    this.state.FilterArticles.forEach((i) => {
       if (i._id === id) {
         this.setState({ activeArticle: i });
       }
     });
-  }
+  };
 
-  searchArticle(e) {
+  searchArticle = (e) => {
     if (e.target.value.length < 1) {
       //輸入框空白
       axios.get("/getArticle").then((res) => {
-        console.log(res.data);
         this.setState({ FilterArticles: res.data });
       });
       return;
     }
     if (e.target.value.length > 20) {
-      sweetAlert("不可超過20字");
+      Swal.fire({
+        text: "不可超過 20 個字",
+        icon: "error",
+      });
       return;
     }
     axios.get(`/articles/title/${e.target.value}`).then((res) => {
-      console.log(res.data);
       this.setState({ FilterArticles: res.data });
     });
-  }
+  };
 
   render() {
     return (
       <div style={style.container}>
+        <Header />
         <TextField
           style={{ position: "absolute", top: "50px", left: "15%" }}
           helperText="搜尋文章..."
           inputProps={{ style: { borderColor: "#EC407A" } }}
-          onChange={(e) => this.searchArticle(e)}
+          onChange={this.searchArticle}
         />
         {this.state.loading ? <Loading /> : ""}
         {this.state.dialog ? (
@@ -117,23 +126,23 @@ class Main extends Component {
         )}
         {this.props.user.login ? (
           <Button
-            onClick={() => this.postArticle()}
-            label="發表文章"
+            onClick={this.postArticle}
             color="primary"
             style={style.postBtn}
-          />
+          >
+            發表文章
+          </Button>
         ) : (
           ""
         )}
         <ArticleBlock
-          articleClick={(e, id) => this.articleClick(e, id)}
+          articleClick={this.articleClick}
           articles={
             this.state.FilterArticles
               ? this.state.FilterArticles
               : this.props.articles
           }
         />{" "}
-        {/*假設重新回到此頁面時state會被清空，此時則直接讀取props而飛state*/}
         {this.state.articleContentModal ? (
           <ArticleContentModal
             user={this.props.user}
